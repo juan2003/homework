@@ -10,6 +10,38 @@
                 padding: 10px;
                 display: none;
             }
+            .loading {
+                position: relative;
+                opacity: 0.4;
+                transition: opacity 0.1s ease-in;
+            }
+            .loading::before {
+                content: 'Please Wait...';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                line-height: 1em;
+                font-size: 2em;
+                margin-top: -0.5em;
+                color: black;
+            }
+            ol.household > li {
+                position: relative;
+            }
+            a.remove {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 1em;
+                height: 1em;
+                text-indent: 3em;
+                overflow: hidden;
+                border-radius: 100%;
+                border: 0.15em solid red;
+                background-image: linear-gradient(135deg, transparent 45%, red 45%, red 55%, transparent 55%);
+            }
         </style>
     </head>
     <body>
@@ -50,7 +82,107 @@
         </div>
         <pre class="debug"></pre>
         <script>
+            "use strict";
             // your code goes here ...
+            var handlers = [];
+            var household = [];
+            function debugOutput (a) {
+                document.querySelector(".debug").innerHTML = JSON.stringify(a);
+            }
+            //Display the list in HTML
+            function addList() {
+                var list = document.querySelector('ol.household');
+                list.appendChild( createListItem(household[household.length-1]) );
+            }
+            function createButton(action) {
+                var a = document.createElement("a");
+                a.appendChild( document.createTextNode(action) );
+                a.classList.add(action.toLowerCase());
+                a.setAttribute("href", "#");
+                return a;
+            }
+            function createListItem(hhMember) {
+                var li = document.createElement('li');
+                li.appendChild( document.createTextNode( JSON.stringify(hhMember) ) );
+                li.appendChild( createButton('Remove') );
+                return li;
+            }
+            //Add people to the list
+            function addHouseholdMember (evt) {
+                var validateError;
+                evt.preventDefault();
+                try {                
+                    var formData = serializeForm();
+                    household.push(formData);
+                    addList();
+                } catch(validateError) {
+                    debugOutput(validateError);
+                }
+            }
+            //Remove previously added entry
+            function removeHouseholdMember(evt) {
+                evt.preventDefault();
+                var i = 0, prev=this.parentElement.previousElementSibling;
+                while (prev) {
+                    i++;
+                    prev = prev.previousElementSibling;
+                }
+                this.parentElement.remove();
+                household.splice(i,1);
+            }
+            //Validate data entry
+            function serializeForm() {
+                var form = document.querySelector("form");
+                var data = {
+                    age: parseInt(form.querySelector("input[name=age]").value),
+                    smoker: form.querySelector("input[name=smoker]").checked,
+                    rel: form.querySelector("select[name=rel]").value
+                };
+                if (!(data.age > 0)) {
+                    throw new Error("Age is required; must be greater than zero");
+
+                }
+                if (!data.rel) {
+                    throw new Error("Relationship is required");
+                }
+                if (data.rel === "self" && household.some(function(g){ return g.rel === "self";}) ){
+                    throw new Error("Only one \"self\" is allowed");                    
+                }
+                if (data.rel === "spouse" && household.some(function(g){ return g.rel === "spouse";}) ){
+                    throw new Error("Only one \"spouse\" is allowed");                    
+                }
+                form.reset();
+                return data;
+            }
+            //Serialize the JSON on form submission with a fake AJAX call
+            function submitForm (evt) {
+                evt.preventDefault();
+                //Show loading state
+                document.querySelector(".builder").classList.add("loading");
+                debugOutput(household);
+                //Fake ajax
+                window.setTimeout(function() {
+                    document.querySelector(".builder.loading").classList.remove("loading");
+                }, 2500);
+            }
+            function registerHandler (selector, handler) {
+                handler.selector = selector;
+                handlers.push(handler);
+            }
+            function universalClickHandler(evt){
+                // evt.target is the element clicked
+                var target = evt.target;
+                // filter the handlers by selector, then call with the target
+                handlers
+                    .filter (function(h){ return target.matches(h.selector); })
+                    .forEach(function(h) { h.call(target, evt) });
+            }
+            //Universal click handler - we do this to get live binding
+            document.addEventListener("click", universalClickHandler, true);
+
+            registerHandler("button[type=submit]", submitForm);
+            registerHandler("button.add", addHouseholdMember);
+            registerHandler("ol.household > li .remove", removeHouseholdMember);
         </script>
     </body>
 </html>

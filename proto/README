@@ -12,11 +12,11 @@ specification in Notes below.
 
 You must answer the following questions:
 
-* What is the total amount in dollars of debits?
-* What is the total amount in dollars of credits?
-* How many autopays were started?
-* How many autopays were ended?
-* What is balance of user ID 2456938384156277127?
+* What is the total amount in dollars of debits?  18203.69953340208
+* What is the total amount in dollars of credits? 9366.019984181883
+* How many autopays were started? 10
+* How many autopays were ended? 8
+* What is balance of user ID 2456938384156277127? 0
 
 You must supply your source code as part of your answer. Write your code in your
 best programming language.

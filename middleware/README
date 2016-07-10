@@ -35,7 +35,7 @@ You must write Go code, in the place indicated in `middleware.go` There is a
 unit test included, in the file `middleware_test.go`: you can run `go test`
 locally to try out your solution before submitting the answer.
 
-    Answer: <checksum string goes here>
+    Answer: 016858b824090bcd4e02c41e608416397200db10
 
 Notes
 -----
